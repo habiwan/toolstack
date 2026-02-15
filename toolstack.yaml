@@ -1,0 +1,47 @@
+services:
+ 
+  it-tools:
+    image: corentinth/it-tools:latest
+    ports:
+      - 888:80
+    restart: unless-stopped
+    container_name: it-tools
+ 
+  libretranslate:
+    container_name: libretranslate
+    image: libretranslate/libretranslate:latest
+    restart: unless-stopped
+    ports:
+      - 8088:5000
+    volumes:
+      - libretranslate_api_keys:/app/db
+      - libretranslate_models:/home/libretranslate/.local:rw
+    tty: true
+    stdin_open: true
+    healthcheck:
+      test: ['CMD-SHELL', './venv/bin/python scripts/healthcheck.py']
+ 
+  stirlingtools:
+      image: docker.stirlingpdf.com/stirlingtools/stirling-pdf:latest
+      environment:
+          - LANGS=en_GB
+          - DISABLE_ADDITIONAL_FEATURES=false
+      volumes:
+          - pdfpipeline:/pipeline/
+          - pdflogs:/logs/
+          - pdfcustomFiles:/customFiles/
+          - pdfextraConfigs:/configs
+          - pdftrainingData:/usr/share/tessdata
+      ports:
+          - 8800:8080
+      container_name: stirling-pdf
+      restart: unless-stopped
+ 
+volumes:
+  pdfpipeline:
+  pdflogs:
+  pdfcustomFiles:
+  pdfextraConfigs:
+  pdftrainingData:
+  libretranslate_models:       
+  libretranslate_api_keys:
